@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+-->
+
+<project name="saxon" default="all">
+
+    <description>
+      Build file for the Saxon application.
+    </description>
+
+	<!-- Input directories for Java source, web artifacts and libraries -->
+	<property name="src" location="net"/>
+	<property name="lib" location="lib"/>
+
+	<!-- Working directories for build process -->
+	<property name="build" location="build"/>
+	
+	 <!-- Classpath for SAXON-patch -->
+	<path id="saxon.class.path">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<!-- =============================================================== -->
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}"/>
+	</target>
+
+	<!-- =============================================================== -->
+
+	<!-- Compile Saxon classes -->
+	<target name="compile-sax" depends="init">
+		<delete dir ="${build}"/>
+		<mkdir dir ="${build}"/>
+		
+		<javac srcdir = "${src}"
+			destdir = "${build}"
+			includes= "sf/saxon/**"
+			source  = "1.5"
+			encoding= "ISO8859-1"
+			debug   = "true">
+			<classpath refid="saxon.class.path"/>
+		</javac>
+
+<!--
+			excludes= "net/sf/saxon/dom,net/sf/saxon/dom4j,net/sf/saxon/dotnet,net/sf/saxon/jdom,net/sf/saxon/s9api,saxon/jdom,net/sf/saxon/sql,saxon/jdom,net/sf/saxon/xom,saxon/jdom,net/sf/saxon/xpath,net/sf/saxon/xqj"
+			-->
+	</target>
+
+	<!-- =============================================================== -->
+
+	<!-- Package Geonetwork code into various libraries -->
+	<target name="jar-sax" depends="compile-sax">
+
+		<copy todir = "${build}">
+			<fileset dir = "${src}" includes = "**/*.properties"/>
+		</copy>
+		
+		<jar jarfile ="saxon-9.1.0.8b-patch.jar"
+			basedir ="${build}"
+			includes="net/sf/saxon/**" >
+			<manifest>
+				<attribute name="Main-Class" value="net.sf.saxon.Transform"/>
+				<attribute name="Project-Name" value="Saxon-B 9.1.0.8 + patch for GeoNetwork"/>
+			</manifest>
+		</jar>
+		
+	</target>
+
+	<!-- =============================================================== -->
+
+	<target name="jar" depends="jar-sax" description="Create all JAR files"/>
+
+	<!-- =============================================================== -->
+
+	<target name="all" depends="jar-sax" />	
+
+	<!-- =============================================================== -->
+
+	<target name="clean" description="Remove all temporary build files">
+		<delete dir="${build}"/>
+	</target>
+
+</project>
